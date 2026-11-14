@@ -1,16 +1,8 @@
 <?php
 
 class User extends Controller {
-    private function checkRole()
-    {
-        if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'User') {
-            header("Location: " . BASEURL);
-            exit;
-        }
-    }
-
     public function index() {
-        $this->checkRole();
+        $this->checkRole('User');
                 
         $data['judul'] = 'Home';
 
@@ -22,7 +14,7 @@ class User extends Controller {
 
     public function ruang()
     {
-        $this->checkRole();
+        $this->checkRole('User');
         $data['judul'] = 'Ruang';
 
         $modelR = $this->model('RuangM');
@@ -42,7 +34,7 @@ class User extends Controller {
 
     public function peminjaman()
     {
-        $this->checkRole();
+        $this->checkRole('User');
 
         $data['judul'] = 'Peminjaman';
 
@@ -62,7 +54,7 @@ class User extends Controller {
 
     public function history()
     {
-        $this->checkRole();
+        $this->checkRole('User');
 
         $data['judul'] = 'History';
 
@@ -79,7 +71,7 @@ class User extends Controller {
 
     public function laporan($id)
     {
-        $this->checkRole();
+        $this->checkRole('User');
 
         $data['judul'] = 'Laporan';
 

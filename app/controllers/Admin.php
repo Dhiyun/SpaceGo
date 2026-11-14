@@ -2,17 +2,9 @@
 
 class Admin extends Controller
 {
-    private function checkRole()
-    {
-        if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Admin') {
-            header("Location: " . BASEURL);
-            exit;
-        }
-    }
-
     public function index()
     {
-        $this->checkRole();
+        $this->checkRole('Admin');
         
         $data['judul'] = 'Admin | Dashboard';
         $modelR = $this->model('RuangM');
@@ -39,7 +31,7 @@ class Admin extends Controller
 
     public function ruang()
     {
-        $this->checkRole();
+        $this->checkRole('Admin');
 
         $data['judul'] = 'Admin | Ruang';
 
@@ -57,7 +49,7 @@ class Admin extends Controller
 
     public function dosen()
     {
-        $this->checkRole();
+        $this->checkRole('Admin');
 
         $data['judul'] = 'Admin | Dosen';
 
@@ -73,7 +65,7 @@ class Admin extends Controller
 
     public function jadwal()
     {
-        $this->checkRole();
+        $this->checkRole('Admin');
 
         $data['judul'] = 'Admin | Jadwal';
 
@@ -93,7 +85,7 @@ class Admin extends Controller
 
     public function peminjaman()
     {
-        $this->checkRole();
+        $this->checkRole('Admin');
 
         $data['judul'] = 'Admin | Peminjaman';
 
@@ -109,7 +101,7 @@ class Admin extends Controller
 
     public function history()
     {
-        $this->checkRole();
+        $this->checkRole('Admin');
 
         $data['judul'] = 'Admin | History';
 

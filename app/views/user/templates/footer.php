@@ -19,7 +19,7 @@
         color: #fff;
     }
 </style>
-<footer class="text-center text-lg-start text-muted">
+<footer class="text-center text-lg-start text-muted mt-auto">
     <!-- <section class=""> -->
         <div class="container-fluid">
             <!-- Grid row -->

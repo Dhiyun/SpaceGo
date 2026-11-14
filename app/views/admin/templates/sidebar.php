@@ -1,9 +1,9 @@
 <?php
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-if (strpos($path, '/dashboard') !== false || $path === '/admin') {
-    $page = 'dashboard';
-} elseif (strpos($path, '/ruang') !== false) {
+$page = 'dashboard';
+
+if (strpos($path, '/ruang') !== false) {
     $page = 'ruang';
 } elseif (strpos($path, '/dosen') !== false) {
     $page = 'dosen';

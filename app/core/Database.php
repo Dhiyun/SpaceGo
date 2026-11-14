@@ -19,6 +19,8 @@ class Database {
 
         try {
             $this->dbh = new PDO($dsn, $this->user, $this->pass, $option);
+            // Matikan ONLY_FULL_GROUP_BY agar query GROUP BY jalan di MySQL seperti di MariaDB
+            $this->dbh->exec("SET SESSION sql_mode = (SELECT REPLACE(@@SESSION.sql_mode, 'ONLY_FULL_GROUP_BY', ''))");
         } catch (PDOException $e) {
             die($e->getMessage());
         }

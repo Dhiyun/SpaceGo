@@ -1,6 +1,10 @@
 <?php
 
 class Jadwal extends Controller {
+    public function __construct() {
+        $this->checkRole('Admin');
+    }
+
     public function tambah() {
         if($this->model("JadwalM")->tambahJadwal($_POST) > 0) {
             Flasher::setFlash('Jadwal Berhasil', 'Ditambahkan', 'success');
@@ -29,11 +33,13 @@ class Jadwal extends Controller {
         $model = $this->model("JadwalM");
 
         try {
-            if($model->editJadwal($_POST) > 0) {
+            $hasil = $model->editJadwal($_POST);
+
+            if($hasil > 0) {
                 Flasher::setFlash('Jadwal Berhasil', 'Diubah', 'success');
                 header('Location: '.ADMINURL.'/jadwal');
                 exit;
-            } elseif($model->editJadwal($_POST) == 0) {
+            } elseif($hasil == 0) {
                 Flasher::setFlash('Tidak Ada Perubahan atau Tidak Sesuai', '', 'info');
                 header('Location: '.ADMINURL.'/jadwal');
                 exit;

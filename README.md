@@ -1,0 +1,167 @@
+# Space Go
+
+Space Go adalah aplikasi web untuk peminjaman ruangan di Jurusan Teknologi Informasi, Politeknik Negeri Malang. Mahasiswa atau dosen bisa melihat denah dan jadwal ruangan, lalu mengajukan peminjaman untuk kegiatan seperti acara atau rapat. Admin yang memutuskan pengajuan itu diterima atau ditolak.
+
+Project ini ditulis dengan PHP native (tanpa framework) memakai pola MVC sederhana yang dibuat sendiri, dengan MySQL/MariaDB sebagai database.
+
+![Halaman awal Space Go](docs/screenshots/home.png)
+
+## Tampilan
+
+### Pengguna
+
+| Beranda | Denah dan daftar ruang |
+|---|---|
+| ![Beranda pengguna](docs/screenshots/user-beranda.png) | ![Denah dan daftar ruang](docs/screenshots/user-ruang.png) |
+
+| Pengajuan peminjaman | Riwayat dan cetak bukti |
+|---|---|
+| ![Form peminjaman](docs/screenshots/user-peminjaman.png) | ![Riwayat peminjaman](docs/screenshots/user-history.png) |
+
+### Admin
+
+| Dashboard | Kelola ruang |
+|---|---|
+| ![Dashboard admin](docs/screenshots/admin-dashboard.png) | ![Kelola ruang](docs/screenshots/admin-ruang.png) |
+
+| Kelola jadwal | Persetujuan peminjaman |
+|---|---|
+| ![Kelola jadwal](docs/screenshots/admin-jadwal.png) | ![Persetujuan peminjaman](docs/screenshots/admin-peminjaman.png) |
+
+### Login
+
+![Halaman login](docs/screenshots/login.png)
+
+## Fitur
+
+**Pengguna (role `User`)**
+- Daftar akun dan login
+- Melihat denah per lantai, daftar ruangan beserta fasilitasnya, dan jadwal kuliah di tiap ruangan
+- Mengajukan peminjaman ruangan
+- Melihat riwayat peminjaman dan mencetak bukti peminjaman
+
+**Admin (role `Admin`)**
+- Dashboard berisi ringkasan: total peminjaman, peminjaman yang masih berjalan dan yang sudah selesai, jumlah ruangan, dan jumlah dosen
+- Kelola data ruangan dan fasilitasnya
+- Kelola data dosen
+- Kelola jadwal kuliah
+- Menerima (*approve*) atau menolak (*decline*) pengajuan peminjaman
+- Melihat riwayat semua peminjaman
+
+Sebagian logika ada di database, bukan di PHP:
+- *Stored procedure* `tambahJadwal` dan `editJadwal` untuk menyimpan jadwal, serta `updatePeminjamanStatus` untuk menandai peminjaman yang sudah lewat tanggal kembali sebagai `Selesai`
+- *Function* `getJumlahDosen` dan `peminjaman_by_status` untuk angka di dashboard
+- *Trigger* yang mencegah ruangan dihapus selama masih ada data peminjamannya, dan yang menolak kapasitas ruangan bernilai negatif
+
+## Kebutuhan
+
+- PHP 8.x dengan ekstensi PDO MySQL
+- MySQL 8.x atau MariaDB 10.4+
+- Apache dengan `mod_rewrite` aktif
+
+Cara paling gampang adalah memakai [Laragon](https://laragon.org/) atau XAMPP, karena semua kebutuhan di atas sudah tersedia di dalamnya.
+
+## Instalasi
+
+1. Clone repo ini ke folder web server kamu (misalnya `www` di Laragon atau `htdocs` di XAMPP).
+
+   ```bash
+   git clone https://github.com/Dhiyun/MVC.git
+   ```
+
+2. Buat database bernama `peminjaman-ruang`, lalu import file [peminjaman-ruang.sql](peminjaman-ruang.sql). File ini sudah berisi tabel, data contoh, *procedure*, *function*, dan *trigger*.
+
+   ```bash
+   mysql -u root -p -e "CREATE DATABASE \`peminjaman-ruang\`"
+   mysql -u root -p peminjaman-ruang < peminjaman-ruang.sql
+   ```
+
+   Bisa juga lewat phpMyAdmin atau HeidiSQL.
+
+   Procedure, function, dan trigger di file dump memakai `DEFINER=root@localhost`. Kalau kamu mengimpor dengan user selain `root`, hapus dulu bagian `DEFINER=...` di file SQL supaya tidak muncul error hak akses.
+
+3. Buka [app/config/config.php](app/config/config.php) dan sesuaikan dua hal:
+   - **`BASEURL`** harus mengarah ke folder `public` sesuai lokasi project di komputer kamu, dan diakhiri garis miring. Contohnya, kalau project ada di `www/PhpNative/MVC`, isinya `http://localhost/PhpNative/MVC/public/`. URL lain (`ADMINURL`, `USERURL`, dan seterusnya) otomatis mengikuti `BASEURL`.
+   - **Database.** Isi `DB_HOST`, `DB_USER`, `DB_PASS`, dan `DB_NAME` sesuai pengaturan MySQL kamu.
+
+4. Buka `BASEURL` tadi di browser, misalnya `http://localhost/PhpNative/MVC/public/`.
+
+## Akun Bawaan
+
+Data contoh di file SQL sudah menyertakan dua akun yang bisa langsung dipakai:
+
+| Role  | Username | Password |
+|-------|----------|----------|
+| Admin | `admin`  | `admin`  |
+| User  | `user`   | `user`   |
+
+Akun baru yang dibuat lewat halaman Register otomatis mendapat role `User`. Untuk membuat admin lain, ubah kolom `role` di tabel `user` langsung dari database.
+
+## Struktur Folder
+
+```
+MVC/
+├── app/
+│   ├── config/       # konfigurasi URL dan koneksi database
+│   ├── controllers/  # Admin, User, Home, Log (login), Reg (register), Ruang, Dosen, Jadwal, Peminjaman
+│   ├── core/         # App (router), Controller, Database (wrapper PDO), Flasher (pesan notifikasi)
+│   ├── fungsi/       # fungsi bantu, dipakai untuk pesan error di halaman login
+│   ├── models/       # query ke database
+│   ├── views/        # tampilan, dipisah per role: home, admin, user
+│   └── init.php      # memuat semua file inti
+├── docs/screenshots/ # gambar untuk README ini
+├── public/
+│   ├── assets/       # Bootstrap, Font Awesome, gambar denah, CSS dan JS tambahan
+│   ├── .htaccess     # mengarahkan semua request ke index.php
+│   └── index.php     # pintu masuk aplikasi
+├── sql/              # draf procedure, function, dan trigger (tidak perlu diimpor)
+└── peminjaman-ruang.sql  # dump database lengkap
+```
+
+## Cara Kerja Routing
+
+Semua request masuk ke `public/index.php` lewat aturan di `public/.htaccess`. Dari situ, class `App` memecah URL menjadi tiga bagian:
+
+```
+/{controller}/{method}/{parameter}
+```
+
+Contohnya, `/ruang/hapus/LPR1` akan memanggil method `hapus('LPR1')` di controller `Ruang`. Kalau controller tidak ditemukan, yang dipakai `Home`. Kalau method tidak ditemukan, yang dipakai `index`. Itu sebabnya `/admin/dashboard` tetap membuka dashboard walaupun controller `Admin` tidak punya method `dashboard`.
+
+Controller `Admin`, `Ruang`, `Dosen`, dan `Jadwal` hanya bisa diakses oleh role `Admin`, sedangkan `User` hanya oleh role `User`. Di controller `Peminjaman`, aksi *approve* dan *decline* khusus admin, sedangkan tambah dan hapus khusus pengguna. Pengguna hanya bisa menghapus peminjaman miliknya sendiri. Siapa pun yang tidak punya akses akan dikembalikan ke halaman awal.
+
+Nama controller di URL harus sama persis dengan nama filenya, termasuk huruf besar-kecil, kalau server berjalan di Linux. Di Windows hal ini tidak berpengaruh.
+
+Halaman-halaman utama:
+
+| URL | Halaman |
+|-----|---------|
+| `/` | Halaman perkenalan |
+| `/log` | Login |
+| `/reg` | Register |
+| `/admin/dashboard` | Dashboard admin |
+| `/admin/ruang`, `/admin/dosen`, `/admin/jadwal` | Kelola data master |
+| `/admin/peminjaman` | Persetujuan peminjaman |
+| `/admin/history` | Riwayat semua peminjaman |
+| `/user/dashboard` | Beranda pengguna |
+| `/user/ruang` | Denah, ruangan, dan jadwal |
+| `/user/peminjaman` | Form pengajuan peminjaman |
+| `/user/history` | Riwayat dan cetak bukti peminjaman |
+
+## Catatan
+
+- Dump database dibuat di MariaDB 10.4. Kalau kamu pakai MySQL, mode `ONLY_FULL_GROUP_BY` sudah dimatikan per koneksi di [app/core/Database.php](app/core/Database.php) supaya query `GROUP BY` di halaman ruangan tetap jalan.
+- Halaman admin dan user memuat CSS dengan path relatif (`../assets/...`). Karena itu, buka halaman lewat URL dua tingkat seperti `/admin/dashboard` atau `/user/dashboard`, bukan `/admin` saja, supaya tampilannya tidak berantakan. Menu navigasi di aplikasi sudah memakai URL yang benar.
+- Password disimpan dengan MD5. Ini cukup untuk keperluan belajar, tapi jangan dipakai di lingkungan produksi. Gunakan `password_hash()` dan `password_verify()` kalau project ini mau dikembangkan lebih jauh.
+- Semua procedure, function, dan trigger sudah ada di `peminjaman-ruang.sql`. File di folder `sql/` hanya draf lama dan sebagian berisi kesalahan sintaks, jadi tidak perlu dijalankan.
+- Folder `public/assets` berisi source lengkap Bootstrap, termasuk `README.md`, `LICENSE`, dan file lain milik Bootstrap. File-file itu bukan bagian dari dokumentasi aplikasi ini.
+
+## Tim
+
+Dibuat oleh Spacetoon Team:
+
+- Dany Fatihul Ihsan
+- Dhika Wahyu Nugroho
+- Febrianti Mayori
+- Larasati Puspita Candra Dewi
+- Rama Pramudhita Bhaskara

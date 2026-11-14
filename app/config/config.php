@@ -1,15 +1,15 @@
 <?php
-define('BASEURL', 'http://localhost/project/MVC/public/');
+define('BASEURL', 'http://localhost/PhpNative/MVC/public/');
 
 //Admin
-define('ADMINURL', 'http://localhost/project/MVC/public/admin');
-define('RUANGURL', 'http://localhost/project/MVC/public/ruang');
-define('DOSENURL', 'http://localhost/project/MVC/public/dosen');
-define('JADWALURL', 'http://localhost/project/MVC/public/jadwal');
+define('ADMINURL', BASEURL . 'admin');
+define('RUANGURL', BASEURL . 'ruang');
+define('DOSENURL', BASEURL . 'dosen');
+define('JADWALURL', BASEURL . 'jadwal');
 
 //User
-define('USERURL', 'http://localhost/project/MVC/public/user');
-define('PEMINJAMANURL', 'http://localhost/project/MVC/public/peminjaman');
+define('USERURL', BASEURL . 'user');
+define('PEMINJAMANURL', BASEURL . 'peminjaman');
 
 date_default_timezone_set("Asia/Jakarta");
 define('DB_HOST', 'localhost');

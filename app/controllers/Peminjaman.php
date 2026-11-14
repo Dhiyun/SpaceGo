@@ -4,6 +4,8 @@ class Peminjaman extends Controller
 {
     public function tambah()
     {
+        $this->checkRole('User');
+
         try {
             if ($this->model("PeminjamanM")->tambahPeminjaman($_POST) > 0) {
                 Flasher::setFlash('Peminjaman Berhasil Ditambahkan', '', 'success');
@@ -14,11 +16,15 @@ class Peminjaman extends Controller
             exit;
         } catch (PDOException $e) {
             Flasher::setFlash('Peminjaman Tidak Sesuai atau Sudah Ada', '', 'warning');
+            header('Location: ' . USERURL . '/peminjaman');
+            exit;
         }
     }
 
     public function hapus($kode)
     {
+        $this->checkRole('User');
+
         if ($this->model("PeminjamanM")->hapusPeminjaman($kode) > 0) {
             Flasher::setFlash('Peminjaman Berhasil Dihapus', '', 'success');
             header('Location: ' . USERURL . '/peminjaman');
@@ -32,6 +38,8 @@ class Peminjaman extends Controller
 
     public function approve($id)
     {
+        $this->checkRole('Admin');
+
         $model = $this->model("PeminjamanM");
 
         try {
@@ -54,6 +62,8 @@ class Peminjaman extends Controller
 
     public function decline($id)
     {
+        $this->checkRole('Admin');
+
         $model = $this->model("PeminjamanM");
 
         try {

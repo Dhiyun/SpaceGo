@@ -2,6 +2,11 @@
 
 class Ruang extends Controller
 {
+    public function __construct()
+    {
+        $this->checkRole('Admin');
+    }
+
     public function tambah()
     {
         try {
@@ -15,7 +20,6 @@ class Ruang extends Controller
                 exit;
             }
         } catch (PDOException $e) {
-            print_r($e->getMessage());
             Flasher::setFlash('Ruang Tidak Sesuai atau Sudah Ada', '', 'warning');
             header('Location: ' . ADMINURL . '/ruang');
             exit;

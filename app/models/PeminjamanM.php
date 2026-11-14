@@ -55,7 +55,7 @@ class PeminjamanM
         FROM peminjaman p
         JOIN user u ON p.id_user = u.id
         JOIN ruangan r ON p.kode_ruangan = r.kode
-        ORDER BY p.kode_ruangan AND p.confirm ASC");
+        ORDER BY p.kode_ruangan, p.confirm ASC");
 
         return $this->db->resultSet();
     }
@@ -106,7 +106,13 @@ class PeminjamanM
 
     public function hapusPeminjaman($kode)
     {
+        $query = "DELETE FROM peminjaman WHERE id = :id AND id_user = (SELECT id FROM user WHERE username = :username)";
+        $this->db->query($query);
+        $this->db->bind('id', $kode);
+        $this->db->bind('username', $_SESSION['username']);
 
+        $this->db->execute();
+        return $this->db->rowCount();
     }
 
     public function editApprove($id)

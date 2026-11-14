@@ -2,6 +2,11 @@
 
 class Dosen extends Controller
 {
+    public function __construct()
+    {
+        $this->checkRole('Admin');
+    }
+
     public function tambah()
     {
         try {

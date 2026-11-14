@@ -19,8 +19,7 @@ class Log extends Controller {
         $username = $_POST['username'];
         $password = $_POST['password'];
 
-        $data['login'] = $this->model('UserLogin')->getUser($username, $password);
-        session_start();
+        $data['login'] = $this->model('UserLogin')->getUser($username);
         if($data['login'] == NULL) {
             pesan('danger', "Login gagal. Periksa kembali username dan password.");
             header("Location:".BASEURL."log");

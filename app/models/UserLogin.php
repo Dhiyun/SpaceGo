@@ -28,8 +28,8 @@ class UserLogin
             if (isset($data['confirm_password']) && $data['confirm_password'] === $data['password']) {
                 $password = md5($data['password']);
                 
-                $this->db->query("INSERT INTO user VALUES 
-                ('', :nama_user, :username, :password, :jabatan, :email, :role)");
+                $this->db->query("INSERT INTO user (nama_user, username, password, jabatan, email, role) VALUES
+                (:nama_user, :username, :password, :jabatan, :email, :role)");
                 $this->db->bind('nama_user', $data['nama_user']);
                 $this->db->bind('username', $data['username']);
                 $this->db->bind('password', $password);
