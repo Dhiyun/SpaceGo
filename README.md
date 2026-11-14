@@ -53,6 +53,101 @@ Sebagian logika ada di database, bukan di PHP:
 - *Function* `getJumlahDosen` dan `peminjaman_by_status` untuk angka di dashboard
 - *Trigger* yang mencegah ruangan dihapus selama masih ada data peminjamannya, dan yang menolak kapasitas ruangan bernilai negatif
 
+## Struktur Database (ERD)
+
+Diagram di bawah menunjukkan tabel-tabel yang dipakai Space Go dan hubungan antar tabelnya.
+
+```mermaid
+erDiagram
+    ruangan ||--o{ detail_ruangan : "punya fasilitas"
+    fasilitas ||--o{ detail_ruangan : "terpasang di"
+    ruangan ||--o{ jadwal : "dipakai kuliah"
+    kelas ||--o{ jadwal : "mengikuti"
+    dosen ||--o{ jadwal : "mengajar"
+    user ||--o{ peminjaman : "mengajukan"
+    ruangan |o--o{ peminjaman : "dipinjam"
+
+    user {
+        int id PK
+        varchar nama_user
+        char username "NIM, NIP, atau kode akun"
+        varchar password "disimpan dengan MD5"
+        enum jabatan "Mahasiswa, Dosen, atau Admin"
+        varchar email
+        enum role "Admin atau User"
+    }
+
+    ruangan {
+        char kode PK "contoh LPY1, RT02"
+        varchar nama_ruangan
+        enum lantai "5, 6, 7, atau 8"
+        int kapasitas "30 atau 60"
+    }
+
+    fasilitas {
+        int id PK
+        varchar nama_barang "AC, Projector, Papan tulis, Spidol, Penghapus"
+    }
+
+    detail_ruangan {
+        int id PK
+        char kode_ruangan FK
+        int id_fasilitas FK
+    }
+
+    dosen {
+        varchar kode PK
+        varchar nama_dosen
+    }
+
+    kelas {
+        int id PK
+        char nama_kelas "contoh 1A"
+        enum prodi "TI, SIB, atau PLS"
+    }
+
+    jadwal {
+        int id PK
+        char kode_ruang FK
+        int id_kelas FK
+        varchar kode_dosen FK
+        varchar hari "Senin sampai Jumat"
+        time waktu_mulai
+        time waktu_selesai
+        varchar matkul
+    }
+
+    peminjaman {
+        int id PK
+        int id_user FK
+        date tanggal_pinjam
+        date tanggal_kembali
+        varchar keterangan
+        char no_telp
+        enum status "Proses atau Selesai"
+        varchar kode_ruangan FK
+        enum confirm "Approve atau Decline, kosong kalau belum diputuskan"
+    }
+```
+
+**Penjelasan singkat tiap tabel:**
+
+| Tabel | Fungsinya |
+|---|---|
+| `user` | Akun untuk login. Kolom `role` menentukan apakah akun masuk ke halaman admin atau halaman pengguna |
+| `ruangan` | Daftar ruangan beserta lantai dan kapasitasnya |
+| `fasilitas`, `detail_ruangan` | Daftar fasilitas dan tabel penghubungnya. Satu ruangan bisa punya banyak fasilitas, dan satu jenis fasilitas bisa ada di banyak ruangan |
+| `dosen`, `kelas` | Data induk dosen dan kelas |
+| `jadwal` | Jadwal kuliah. Satu baris berarti satu kelas diajar satu dosen di satu ruangan pada hari dan jam tertentu |
+| `peminjaman` | Pengajuan pinjam ruangan oleh pengguna. `status` berubah menjadi `Selesai` otomatis setelah tanggal kembali lewat, sedangkan `confirm` diisi admin dan kosong selama pengajuan belum diputuskan |
+
+Arti garis penghubung: `||` berarti **tepat satu**, `o{` berarti **boleh nol atau banyak**, dan `|o` berarti **boleh kosong atau satu**. Contohnya, satu ruangan bisa punya banyak jadwal, tapi setiap jadwal hanya untuk satu ruangan.
+
+**Cara hubungan antar tabel dijaga:**
+- Di dump asli `peminjaman-ruang.sql`, hubungan di atas dijaga oleh *foreign key* dengan `ON DELETE CASCADE` dan `ON UPDATE CASCADE`.
+- File `peminjaman-ruang-hosting.sql` tidak memuat *foreign key*. Aplikasi menjaganya sendiri lewat PHP (folder `app/models`): menghapus ruangan ikut menghapus jadwal dan fasilitasnya, menghapus dosen ikut menghapus jadwalnya, dan mengubah kode ruangan atau dosen ikut memperbarui data yang terkait.
+- Ruangan yang masih punya data peminjaman tidak bisa dihapus, dan kapasitas ruangan tidak boleh negatif.
+
 ## Kebutuhan
 
 - PHP 8.x dengan ekstensi PDO MySQL
@@ -107,7 +202,7 @@ Akun baru yang dibuat lewat halaman Register otomatis mendapat role `User`. Untu
 ## Struktur Folder
 
 ```
-MVC/
+SpaceGo/
 ├── app/
 │   ├── config/       # config.example.php: contoh konfigurasi URL dan koneksi database
 │   ├── controllers/  # Admin, User, Home, Log (login), Reg (register), Ruang, Dosen, Jadwal, Peminjaman
