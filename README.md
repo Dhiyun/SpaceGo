@@ -80,9 +80,16 @@ Cara paling gampang adalah memakai [Laragon](https://laragon.org/) atau XAMPP, k
 
    Procedure, function, dan trigger di file dump memakai `DEFINER=root@localhost`. Kalau kamu mengimpor dengan user selain `root`, hapus dulu bagian `DEFINER=...` di file SQL supaya tidak muncul error hak akses.
 
-3. Buka [app/config/config.php](app/config/config.php) dan sesuaikan dua hal:
+3. Salin [app/config/config.example.php](app/config/config.example.php) menjadi `app/config/config.php`, lalu sesuaikan dua hal:
+
+   ```bash
+   cp app/config/config.example.php app/config/config.php
+   ```
+
    - **`BASEURL`** harus mengarah ke folder `public` sesuai lokasi project di komputer kamu, dan diakhiri garis miring. Contohnya, kalau project ada di `www/PhpNative/MVC`, isinya `http://localhost/PhpNative/MVC/public/`. URL lain (`ADMINURL`, `USERURL`, dan seterusnya) otomatis mengikuti `BASEURL`.
    - **Database.** Isi `DB_HOST`, `DB_USER`, `DB_PASS`, dan `DB_NAME` sesuai pengaturan MySQL kamu.
+
+   File `config.php` sudah masuk `.gitignore`, jadi pengaturan dan password di komputermu tidak ikut terunggah ke GitHub.
 
 4. Buka `BASEURL` tadi di browser, misalnya `http://localhost/PhpNative/MVC/public/`.
 
@@ -102,7 +109,7 @@ Akun baru yang dibuat lewat halaman Register otomatis mendapat role `User`. Untu
 ```
 MVC/
 ├── app/
-│   ├── config/       # konfigurasi URL dan koneksi database
+│   ├── config/       # config.example.php: contoh konfigurasi URL dan koneksi database
 │   ├── controllers/  # Admin, User, Home, Log (login), Reg (register), Ruang, Dosen, Jadwal, Peminjaman
 │   ├── core/         # App (router), Controller, Database (wrapper PDO), Flasher (pesan notifikasi)
 │   ├── fungsi/       # fungsi bantu, dipakai untuk pesan error di halaman login

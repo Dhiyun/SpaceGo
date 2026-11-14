@@ -1,5 +1,5 @@
 <?php
-define('BASEURL', 'http://localhost/PhpNative/MVC/public/');
+define('BASEURL', 'http://localhost/MVC/public/');
 
 //Admin
 define('ADMINURL', BASEURL . 'admin');
