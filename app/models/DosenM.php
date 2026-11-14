@@ -24,7 +24,7 @@ class DosenM
 
     public function getCountDosen()
     {
-        $this->db->query("SELECT getJumlahDosen() as hitung");
+        $this->db->query("SELECT COUNT(*) as hitung FROM dosen");
         $this->db->execute();
         $result = $this->db->single(); 
         return $result['hitung'];
@@ -42,6 +42,10 @@ class DosenM
 
     public function hapusDosen($kode)
     {
+        $this->db->query("DELETE FROM jadwal WHERE kode_dosen = :kode");
+        $this->db->bind('kode', $kode);
+        $this->db->execute();
+
         $this->db->query("DELETE FROM dosen WHERE kode = :kode");
         $this->db->bind('kode', $kode);
 
@@ -59,7 +63,13 @@ class DosenM
         $this->db->bind('nama_dosen', $data['nama_dosen']);
         $this->db->bind('old_kode', $data['old_kode']);
         $this->db->execute();
+        $hasil = $this->db->rowCount();
 
-        return $this->db->rowCount();
+        $this->db->query("UPDATE jadwal SET kode_dosen = :kode WHERE kode_dosen = :old_kode");
+        $this->db->bind('kode', $data['kode']);
+        $this->db->bind('old_kode', $data['old_kode']);
+        $this->db->execute();
+
+        return $hasil;
     }
 }

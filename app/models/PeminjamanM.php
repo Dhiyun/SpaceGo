@@ -19,7 +19,7 @@ class PeminjamanM
 
     public function getCountPeminjamanProses()
     {
-        $this->db->query("SELECT peminjaman_by_status('proses') as proses");
+        $this->db->query("SELECT COUNT(*) as proses FROM peminjaman WHERE status = 'Proses'");
         $this->db->execute();
         $result = $this->db->single();
         return $result['proses'];
@@ -27,7 +27,7 @@ class PeminjamanM
 
     public function getCountPeminjamanSelesai()
     {
-        $this->db->query("SELECT peminjaman_by_status('selesai') as selesai");
+        $this->db->query("SELECT COUNT(*) as selesai FROM peminjaman WHERE status = 'Selesai'");
         $this->db->execute();
         $result = $this->db->single();
         return $result['selesai'];
@@ -39,15 +39,15 @@ class PeminjamanM
         return $this->db->resultSet();
     }
 
-    private function updatePeminjamanStatusProcedure()
+    private function updatePeminjamanStatus()
     {
-        $this->db->query("CALL updatePeminjamanStatus();");
+        $this->db->query("UPDATE peminjaman SET status = 'Selesai' WHERE NOW() > tanggal_kembali");
         $this->db->execute();
     }
 
     public function getAllPeminjaman()
     {
-        $this->updatePeminjamanStatusProcedure();
+        $this->updatePeminjamanStatus();
         
         $this->db->query("SELECT p.id as id_pinjam, u.username, u.nama_user, p.tanggal_pinjam, p.tanggal_kembali,
         CONCAT(p.tanggal_pinjam, ' - ', p.tanggal_kembali) as tanggal, 
